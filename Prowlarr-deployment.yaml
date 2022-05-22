@@ -1,0 +1,43 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prowlarr
+  labels:
+    app: prowlarr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prowlarr
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: prowlarr
+    spec:
+      #hostNetwork: true
+      containers:
+      - name: prowlarr
+        imagePullPolicy: "Always"
+        image: lscr.io/linuxserver/prowlarr:develop
+        ports:
+        - name: http
+          containerPort: 9696
+          protocol: TCP
+        env:
+        - name: TZ
+          value: "America/Denver"
+        - name: PUID
+          value: "1000"
+        - name: GUID
+          value: "1000"
+      volumeMounts:
+      - name: prowlarr
+        mountPath: /config
+        subPath: prowlarr/config
+      volumes:
+      - name: prowlarr
+        persistentVolumeClaim:
+        claimName: synology-prowlarr
