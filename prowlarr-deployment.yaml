@@ -21,7 +21,7 @@ spec:
       containers:
       - name: prowlarr
         imagePullPolicy: "Always"
-        image: lscr.io/linuxserver/prowlarr:develop
+        image: lscr.io/linuxserver/prowlarr:develop 
         ports:
         - name: http
           containerPort: 9696
@@ -30,14 +30,14 @@ spec:
         - name: TZ
           value: "America/Denver"
         - name: PUID
-          value: "1000"
+          value: "666"
         - name: GUID
-          value: "1000"
-      volumeMounts:
-      - name: prowlarr
-        mountPath: /config
-        subPath: prowlarr/config
+          value: "321"
+        volumeMounts:
+        - name: k8s-pv01
+          mountPath: /config
+          subPath: prowlarr/config
       volumes:
-      - name: prowlarr
+      - name: k8s-pv01
         persistentVolumeClaim:
-        claimName: synology-prowlarr
+          claimName: synology-k8s-pv01
