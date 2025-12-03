@@ -17,11 +17,19 @@ spec:
       labels:
         app: prowlarr
     spec:
-      #hostNetwork: true
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: tpu
+                operator: NotIn
+                values:
+                - "true"
       containers:
       - name: prowlarr
         imagePullPolicy: "Always"
-        image: lscr.io/linuxserver/prowlarr:develop 
+        image: linuxserver/prowlarr:latest
         ports:
         - name: http
           containerPort: 9696
@@ -37,6 +45,11 @@ spec:
         - name: k8s-pv02
           mountPath: /config
           subPath: prowlarr/config
+      tolerations:
+      - key: "vpn"
+        operator: "Equal"
+        value: "required"
+        effect: "NoSchedule"
       volumes:
       - name: k8s-pv02
         persistentVolumeClaim:
