@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -22,34 +21,65 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: tpu
-                operator: NotIn
+              - key: egress.network/internet
+                operator: In
                 values:
-                - "true"
+                - 'true'
       containers:
       - name: prowlarr
-        imagePullPolicy: "Always"
+        imagePullPolicy: IfNotPresent
         image: linuxserver/prowlarr:latest
+        startupProbe:
+          httpGet:
+            path: /ping
+            port: http
+            httpHeaders:
+            - name: Host
+              value: localhost
+          periodSeconds: 10
+          failureThreshold: 30
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: http
+            httpHeaders:
+            - name: Host
+              value: localhost
+          periodSeconds: 10
+          timeoutSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: http
+            httpHeaders:
+            - name: Host
+              value: localhost
+          periodSeconds: 20
+          timeoutSeconds: 3
         ports:
         - name: http
           containerPort: 9696
           protocol: TCP
         env:
         - name: TZ
-          value: "America/Denver"
+          value: America/Denver
         - name: PUID
-          value: "666"
+          value: '666'
         - name: GUID
-          value: "321"
+          value: '321'
         volumeMounts:
         - name: k8s-pv02
           mountPath: /config
           subPath: prowlarr/config
       tolerations:
-      - key: "vpn"
-        operator: "Equal"
-        value: "required"
-        effect: "NoSchedule"
+      - key: vpn
+        operator: Equal
+        value: required
+        effect: NoSchedule
+      - key: dedicated
+        operator: Equal
+        value: internet-egress
+        effect: NoSchedule
       volumes:
       - name: k8s-pv02
         persistentVolumeClaim:
